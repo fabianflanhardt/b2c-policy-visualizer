@@ -1,0 +1,312 @@
+{
+  TrustFrameworkPolicy: {
+    BasePolicy: {
+      TenantId: "{Settings:Tenant}",
+      PolicyId: "B2C_1A_Got_LocalAccounts_TrustFrameworkTop",
+        },
+    UserJourneys: {
+      UserJourney: {
+        OrchestrationSteps: {
+          OrchestrationStep: [
+                        {
+              Preconditions: {
+                Precondition: {
+                  Value: "readOnlyEmail",
+                  Action: "SkipThisOrchestrationStep",
+                                },
+                            },
+              ClaimsProviderSelections: {
+                ClaimsProviderSelection: "",
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: {
+                  Value: "readOnlyEmail",
+                  Action: "SkipThisOrchestrationStep",
+                                },
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: {
+                  Value: "signInName",
+                  Action: "SkipThisOrchestrationStep",
+                                },
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: {
+                  Value: [
+                                        "termsOfUseConsentRequired",
+                                        "True",
+                                    ],
+                  Action: "SkipThisOrchestrationStep",
+                                },
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: [
+                                            "isProfileComplete",
+                                            "True",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "extension_forceInitialPasswordChange",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: [
+                                            "extension_forceInitialPasswordChange",
+                                            "True",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "mobile",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: [
+                                            "mobile",
+                                            "Null",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "extension_primaryEmailAddress",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: [
+                                            "extension_primaryEmailAddress",
+                                            "Null",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: [
+                                            "extension_EmailVerified",
+                                            "True",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "sendToEmail",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: [
+                                            "extension_EmailVerified",
+                                            "True",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "readOnlyEmail",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: [
+                                            "extension_EmailVerified",
+                                            "True",
+                                        ],
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: {
+                  Value: "isPrimaryEmailChanged",
+                  Action: "SkipThisOrchestrationStep",
+                                },
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "readOnlyEmail",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        {
+              Preconditions: {
+                Precondition: [
+                                    {
+                    Value: "isMailVerification",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                    {
+                    Value: "readOnlyEmail",
+                    Action: "SkipThisOrchestrationStep",
+                                    },
+                                ],
+                            },
+              ClaimsExchanges: {
+                ClaimsExchange: "",
+                            },
+                        },
+                        "",
+                    ],
+                },
+        ClientDefinition: "",
+            },
+        },
+    RelyingParty: {
+      DefaultUserJourney: "",
+      UserJourneyBehaviors: {
+        SingleSignOn: "",
+        SessionExpiryType: "Rolling",
+        SessionExpiryInSeconds: 86400,
+        JourneyInsights: "",
+        ScriptExecution: "Allow",
+            },
+      TechnicalProfile: {
+        DisplayName: "PolicyProfile",
+        Protocol: "",
+        CryptographicKeys: {
+          Key: "",
+                },
+        InputClaims: {
+          InputClaim: [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    ],
+                },
+        OutputClaims: {
+          OutputClaim: [
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    ],
+                },
+        SubjectNamingInfo: "",
+            },
+        },
+    },
+}

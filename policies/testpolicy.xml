@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0" TenantId="{Settings:Tenant}" PolicyId="B2C_1A_Got_LocalAccounts_signup_signin" PublicPolicyUri="http://{Settings:Tenant}/B2C_1A_Got_LocalAccounts_signup_signin" DeploymentMode="Development" UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights">
+
+  <BasePolicy>
+    <TenantId>{Settings:Tenant}</TenantId>
+    <PolicyId>B2C_1A_Got_LocalAccounts_TrustFrameworkTop</PolicyId>
+  </BasePolicy>
+
+  <UserJourneys>
+    <UserJourney Id="SignUpOrSignIn">
+      <OrchestrationSteps>
+
+        <OrchestrationStep Order="1" Type="CombinedSignInAndSignUp" ContentDefinitionReferenceId="api.signuporsignin">
+          <Preconditions>
+            <!-- If user comes back after email verification, skip this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>readOnlyEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsProviderSelections>
+            <ClaimsProviderSelection ValidationClaimsExchangeId="LocalAccountSigninUsernameExchange" />
+            <!-- <ClaimsProviderSelection TargetClaimsExchangeId="PasswordResetUsingEmailAddressExchange" /> -->
+          </ClaimsProviderSelections>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="LocalAccountSigninUsernameExchange" TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Username"/>
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+
+        <!-- This step reads any user attributes that we may not have received when in the token. -->
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>readOnlyEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Read the user ID from AAD by email address sent from web application via client_assertion JWT token-->
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <Preconditions>
+            <!-- If user comes back after email verification, run this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>signInName</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="ReadUserBySignInName" TechnicalProfileReferenceId="AAD-UserReadUsingSignInName" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Read the user ID from AAD by email address sent from web application via client_assertion JWT token-->
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="CheckTermsOfUseStatus" TechnicalProfileReferenceId="Check-TOU-Status" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Display Terms of Use consent page for any SignIn scenario based on termsOfUseConsentRequired claim -->
+        <OrchestrationStep Order="5" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="false">
+              <Value>termsOfUseConsentRequired</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="ShowToUConsentPageForNewUser" TechnicalProfileReferenceId="SelfAsserted-Input-ToU-SignIn" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Read the user ID from AAD by email address sent from web application via client_assertion JWT token-->
+        <OrchestrationStep Order="6" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="CheckProfileComplete" TechnicalProfileReferenceId="Check-Profile-Complete" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Display Terms of Use consent page for any SignIn scenario based on termsOfUseConsentRequired claim -->
+        <OrchestrationStep Order="7" Type="ClaimsExchange">
+          <Preconditions>
+            <!--skip this step if attribute that indicates successful mail validation is true -->
+            <!-- <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>extension_EmailVerified</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition> -->
+            <!-- Skip this step, If user comes back after email verification -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>isProfileComplete</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="ShowWelcomePage" TechnicalProfileReferenceId="SelfAsserted-WelcomePage" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Initial Password Reset if not happened, yet -->
+        <OrchestrationStep Order="8" Type="ClaimsExchange">
+          <Preconditions>
+            <!--Skip this step if extension attribuite forceinitialpasswordchange is not present or is true -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>extension_forceInitialPasswordChange</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="false">
+              <Value>extension_forceInitialPasswordChange</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="NewCredentials" TechnicalProfileReferenceId="LocalAccountSetInitialPasswordUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!--Verify new Phone Number -->
+        <OrchestrationStep Order="9" Type="ClaimsExchange">
+          <Preconditions>
+            <!--skip this step if User comes back after clicking the link in the mail -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>mobile</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="false">
+              <Value>mobile</Value>
+              <Value>Null</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="NewPhoneFactor" TechnicalProfileReferenceId="SelfAsserted-SMSVerifyInitialMFAPhone-DisplayClaims" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="10" Type="ClaimsExchange">
+          <Preconditions>
+            <!-- Only execute this step, if extension_primaryEmailAddress is not yet set -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>extension_primaryEmailAddress</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!-- Only execute this step, if extension_primaryEmailAddress is not yet set -->
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="false">
+              <Value>extension_primaryEmailAddress</Value>
+              <Value>Null</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!-- If user comes back after email verification, Skip this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="ProvideNewPrimaryEmailAddress" TechnicalProfileReferenceId="SelfAsserted-ProvideInitialPrimaryEmailAddress"/>
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Set verification mail recipient address to Sign In Email Address -->
+        <OrchestrationStep Order="11" Type="ClaimsExchange">
+          <Preconditions>
+            <!--skip this step if attribute that indicates successful mail validation is true -->
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>extension_EmailVerified</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!--skip this step if a user just provided a new email address -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>sendToEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!-- If user comes back after email verification, Skip this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SetSendToEmail" TechnicalProfileReferenceId="LocalAccount-UserSetSendToEmailfromSignInEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Send Verification mail if mail is not yet verified -->
+        <OrchestrationStep Order="12" Type="ClaimsExchange">
+          <Preconditions>
+            <!--skip this step if attribute that indicates successful mail validation is true -->
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>extension_EmailVerified</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!-- If user comes back after email verification, Skip this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SendVerificationMail" TechnicalProfileReferenceId="{Settings:VerificationMailTechnicalProfileName}" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="13" Type="ClaimsExchange">
+          <Preconditions>
+            <!-- If user comes back after email verification, run this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>readOnlyEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <!--skip this step if attribute that indicates successful mail validation is true -->
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>extension_EmailVerified</Value>
+              <Value>True</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="WriteNewPrimaryEmail" TechnicalProfileReferenceId="AAD-UserWriteEmailUsingObjectId"/>
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- Write Mail Validation after user comes back using mail validation link -->
+        <OrchestrationStep Order="14" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>isPrimaryEmailChanged</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <!-- Start Mail Validation technical Profile -->
+            <ClaimsExchange Id="InitiateUpgradeProcess" TechnicalProfileReferenceId="REST-API-B2CServices-handleVerificationMail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- If this is a mail verification, Set the message that will be sent to sendMessage REST API -->
+        <OrchestrationStep Order="15" Type="ClaimsExchange">
+          <Preconditions>
+            <!-- If user comes back after email verification, run this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>readOnlyEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <!-- generate mail verification success message -->
+            <ClaimsExchange Id="SetMailVerificationSuccessMessage" TechnicalProfileReferenceId="Transform-CreateMessageClaim-Mailverification" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- End Flow with Message instead of a token when Mail Verification has been done -->
+        <OrchestrationStep Order="16" Type="ClaimsExchange">
+          <Preconditions>
+            <!-- If user comes back after email verification, run this step -->
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>isMailVerification</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+              <Value>readOnlyEmail</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <!-- Start Mail Validation technical Profile -->
+            <ClaimsExchange Id="EndMailVerificationWithMessage" TechnicalProfileReferenceId="REST-API-B2CServices-returnMessage" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="17" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+  </UserJourneys>
+
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="SignUpOrSignIn" />
+    <!--Step 2: Add the following node immediately after the DefaultUserJourney element-->
+    <UserJourneyBehaviors>
+      <SingleSignOn Scope="Application" />
+      <SessionExpiryType>Rolling</SessionExpiryType>
+      <SessionExpiryInSeconds>86400</SessionExpiryInSeconds>
+      <JourneyInsights TelemetryEngine="ApplicationInsights" InstrumentationKey="{Settings:AppInsightsInstrumentationKey}" DeveloperMode="true" ClientEnabled="false" ServerEnabled="true" TelemetryVersion="1.0.0" />
+      <ScriptExecution>Allow</ScriptExecution>
+    </UserJourneyBehaviors>
+    <TechnicalProfile Id="PolicyProfile">
+      <DisplayName>PolicyProfile</DisplayName>
+      <Protocol Name="OpenIdConnect" />
+      <CryptographicKeys>
+        <Key Id="client_secret" StorageReferenceId="{Settings:B2CServicesClientAssertionSigningKey}" />
+      </CryptographicKeys>
+      <InputClaims>
+        <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="cn" />
+        <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="verifiedEmail" />
+        <InputClaim ClaimTypeReferenceId="ReadOnlyEmail" PartnerClaimType="verifiedEmail" />
+        <InputClaim ClaimTypeReferenceId="extension_EmailVerified" PartnerClaimType="emailVerified"/>
+        <InputClaim ClaimTypeReferenceId="EmailVerified"/>
+        <InputClaim ClaimTypeReferenceId="isMailVerification"/>
+      </InputClaims>
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub"/>
+        <OutputClaim ClaimTypeReferenceId="extension_EmailVerified" PartnerClaimType="emailVerified"/>
+        <OutputClaim ClaimTypeReferenceId="extension_identLevel" PartnerClaimType="identLevel"/>
+        <OutputClaim ClaimTypeReferenceId="extension_customerId" PartnerClaimType="customerId"/>
+        <OutputClaim ClaimTypeReferenceId="isMailVerification"/>
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" />
+    </TechnicalProfile>
+
+  </RelyingParty>
+</TrustFrameworkPolicy>
