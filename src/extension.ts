@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as parser from 'fast-xml-parser';
 import * as fs from 'fs';
-import 'isomorphic-fetch';
+// import 'isomorphic-fetch'
 
 import PolicyParser from './lib/b2c-policy-parser';
 
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 			{}
 		);
 		// Get path to resource on disk
-		const filepath = path.join(context.extensionPath, 'policies', 'testpolicy.xml');
+		const filepath = path.join(context.extensionPath, 'policies', 'StarterPack', 'SignUpOrSignin.xml');
 
 		const policyContent = fs.readFileSync(filepath, 'utf-8');
 
